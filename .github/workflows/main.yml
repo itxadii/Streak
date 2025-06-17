@@ -1,0 +1,21 @@
+name: contribution-streak-maintainer
+
+on:
+  workflow_dispatch:
+  schedule:
+    # For more information on the cron scheduler,
+    # see https://crontab.guru/ or https://crontab.cronhub.io/.
+    # This cron schedule means the action runs every day at midnight UTC.
+    - cron: "0 22 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  contribution-streak-maintainer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Make a contribution
+        run: npx contribution-streak-maintainer ${{github.repository}} --email=itzzsecure@email.com
+        env:
+          DEVFUL_GITHUB_TOKEN: ${{ secrets.CSM_GITHUB_TOKEN }}
