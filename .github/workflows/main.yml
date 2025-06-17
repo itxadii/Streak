@@ -18,4 +18,4 @@ jobs:
       - name: Make a contribution
         run: npx contribution-streak-maintainer ${{github.repository}} --email=itzzsecure@email.com
         env:
-          DEVFUL_GITHUB_TOKEN: ${{ secrets.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 }}
+          DEVFUL_GITHUB_TOKEN: ${{ secrets.CSM_GITHUB_TOKEN}}
