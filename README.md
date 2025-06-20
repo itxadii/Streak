@@ -50,6 +50,7 @@ gpg --full-generate-key
 # 3. Expiration: 0 = no expiration
 # 4. Name: Your Name
 # 5. Email: Your GitHub email
+# 6. Password: Don't create just skip, otherwise script will not work. 
 
 # Export keys
 gpg --armor --export YOUR_KEY_ID > public-gpg-key.asc
