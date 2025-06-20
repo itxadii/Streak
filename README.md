@@ -70,7 +70,7 @@ Create these secrets:
 
 * `GH_PAT`: Your GitHub Personal Access Token
 * `GPG_PRIVATE_KEY`: Contents of `private-gpg-key.asc`
-* 
+
 ---
 
 ### Step 3: Add Workflow File
