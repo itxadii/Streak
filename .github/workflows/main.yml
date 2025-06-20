@@ -15,7 +15,13 @@ jobs:
   contribution-streak-maintainer:
     runs-on: ubuntu-latest
     steps:
+      - name: Set Git Identity
+        run: |
+          git config user.name "itxadii"
+          git config user.email "163154088+itxadii@users.noreply.github.com"
+
       - name: Make a contribution
-        run: npx contribution-streak-maintainer ${{github.repository}} --email=itzzsecure@email.com --condition=6
+        run: npx contribution-streak-maintainer ${{ github.repository }} --email=163154088+itxadii@users.noreply.github.com --condition=6
         env:
-          DEVFUL_GITHUB_TOKEN: ${{ secrets.CSM_GITHUB_TOKEN}}
+          DEVFUL_GITHUB_TOKEN: ${{ secrets.CSM_GITHUB_TOKEN }}
+
