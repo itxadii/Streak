@@ -24,9 +24,11 @@ jobs:
 
     - name: Commit & Push
       run: |
+        git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}
         git add AUTOMATED_CONTRIBUTIONS.md
         git commit -m "chore: update contributions on $(date -u)"
         git push
+
       env:
         GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
