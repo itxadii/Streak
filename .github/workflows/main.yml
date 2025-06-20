@@ -1,23 +1,32 @@
-name: contribution-streak-maintainer
+name: 🚀 Auto Daily Contribution
 
 on:
-  workflow_dispatch: # Allows manual trigger
   schedule:
-    - cron: "0 22 * * *" # Runs daily at 3:30 AM IST (22:00 UTC)
-
-permissions:
-  contents: write # Needed to make commits
+    - cron: '0 0 * * *'  # Runs at 5:30 AM IST every day (00:00 UTC)
+  workflow_dispatch:
 
 jobs:
-  maintain-streak:
+  commit:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Make a contribution
-        run: |
-          npx contribution-streak-maintainer itxadii/Streak \
-            --email=163154088+itxadii@users.noreply.github.com \
-            --token=${{ secrets.GITHUB_TOKEN }}
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
+    - name: Set Git Identity
+      run: |
+        git config user.name "itxadii"
+        git config user.email "itzzsecure@gmail.com"
 
+    - name: Make a change to trigger contribution
+      run: |
+        echo "Last updated on $(TZ='Asia/Kolkata' date)" > AUTOMATED_CONTRIBUTIONS.md
+
+    - name: Commit & Push
+      run: |
+        git add AUTOMATED_CONTRIBUTIONS.md
+        git commit -m "chore: update contributions on $(date -u)"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
