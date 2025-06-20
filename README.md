@@ -1,49 +1,42 @@
-Streak Maintainer: Automated Daily GitHub Contributions
+# Streak Maintainer: Automated Daily GitHub Contributions
 
-https://img.shields.io/github/actions/workflow/status/itxadii/Streak/main.yml?label=Build&style=flat-square
-https://img.shields.io/badge/License-MIT-green.svg?style=flat-square
+[![Build Status](https://img.shields.io/github/actions/workflow/status/itxadii/Streak/main.yml?label=Build\&style=flat-square)](https://github.com/itxadii/Streak/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
 Automate your GitHub contribution streak with verified GPG-signed commits. This solution ensures you never miss a day, even if you're busy or on vacation.
-Features
 
-    ✅ Daily automated commits to maintain your streak
+## Features
 
-    🔒 Verified GPG-signed commits for authenticity
+* ✅ Daily automated commits to maintain your streak
+* 🔒 Verified GPG-signed commits for authenticity
+* ⏰ Triple-redundant scheduling to prevent misses
+* ⚙️ Smart commit detection - only commits once per day
+* 🌐 Time zone optimized for global reliability
 
-    ⏰ Triple-redundant scheduling to prevent misses
+## Why Use This?
 
-    ⚙️ Smart commit detection - only commits once per day
+* Maintain your GitHub contribution graph (green dots)
+* Never lose your streak due to travel, illness, or busy periods
+* Learn GitHub Actions and GPG commit signing
+* Customizable for any repository
+* 100% free and open source
 
-    🌐 Time zone optimized for global reliability
+## Prerequisites
 
-Why Use This?
+* GitHub Account with a public repository
+* GitHub Personal Access Token (PAT)
 
-    Maintain your GitHub contribution graph (green dots)
+  * Required permissions: `repo` (full control of private repositories)
+  * Fine-grained permissions: `Contents: Read and write`
+* GPG Key Pair (public key added to GitHub account)
 
-    Never lose your streak due to travel, illness, or busy periods
+---
 
-    Learn GitHub Actions and GPG commit signing
+## Setup Guide
 
-    Customizable for any repository
+### Step 1: Generate GPG Key
 
-    100% free and open source
-
-Prerequisites
-
-    GitHub Account with a public repository
-
-    GitHub Personal Access Token (PAT)
-
-        Required permissions: repo (full control of private repositories)
-
-        Fine-grained permissions: Contents: Read and write
-
-    GPG Key Pair (public key added to GitHub account)
-
-Setup Guide
-Step 1: Generate GPG Key
-bash
-
+```bash
 # Install GPG if needed
 brew install gnupg        # macOS
 sudo apt install gnupg    # Ubuntu
@@ -61,33 +54,37 @@ gpg --full-generate-key
 # Export keys
 gpg --armor --export YOUR_KEY_ID > public-gpg-key.asc
 gpg --armor --export-secret-keys YOUR_KEY_ID > private-gpg-key.asc
+```
 
-Add public key to GitHub:
-https://github.com/settings/keys
-Step 2: Create GitHub Secrets
+Add your **public key** here:
+👉 [https://github.com/settings/keys](https://github.com/settings/keys)
 
-    Go to your repository → Settings → Secrets → Actions
+---
 
-    Create these secrets:
+### Step 2: Create GitHub Secrets
 
-        GH_PAT: Your GitHub Personal Access Token
+Go to your repository → `Settings > Secrets > Actions`
 
-        GPG_PRIVATE_KEY: Contents of private-gpg-key.asc
+Create these secrets:
 
-        GPG_PASSPHRASE: Passphrase for your GPG key (if any)
+* `GH_PAT`: Your GitHub Personal Access Token
+* `GPG_PRIVATE_KEY`: Contents of `private-gpg-key.asc`
+* `GPG_PASSPHRASE`: Passphrase used while generating your key (if any)
 
-Step 3: Add Workflow File
+---
 
-Create .github/workflows/main.yml with this content:
-yaml
+### Step 3: Add Workflow File
 
+Create `.github/workflows/main.yml`:
+
+```yaml
 name: Auto Contribution Commit
 
 on:
   schedule:
-    - cron: '0 21 * * *'  # 21:00 UTC = 2:30 AM IST
-    - cron: '30 22 * * *' # 22:30 UTC = 4:00 AM IST
-    - cron: '50 23 * * *' # 23:50 UTC = 5:20 AM IST
+    - cron: '0 21 * * *'
+    - cron: '30 22 * * *'
+    - cron: '50 23 * * *'
   workflow_dispatch:
 
 jobs:
@@ -153,68 +150,82 @@ jobs:
           git add AUTOMATED_CONTRIBUTIONS.md
           git commit -S -m "chore: auto commit at $(date -u)" || exit 0
           git push
+```
 
-Step 4: Create Contribution File
+---
 
-Create AUTOMATED_CONTRIBUTIONS.md in your repository root:
-markdown
+### Step 4: Create Contribution File
 
+Create `AUTOMATED_CONTRIBUTIONS.md`:
+
+```markdown
 # Automated Daily Contributions
 
 This file maintains my GitHub contribution streak with verified commits.
 
 - Project: https://github.com/itxadii/Streak
 - Last update: $(date -u)
+```
 
-Customization
-Change Schedule Times
+---
 
-Modify the cron schedule in the workflow file:
-yaml
+## Customization
 
+### Change Schedule Times
+
+```yaml
 on:
   schedule:
-    - cron: '0 21 * * *'  # 21:00 UTC (9 PM UTC)
-    - cron: '30 22 * * *' # 22:30 UTC (10:30 PM UTC)
-    - cron: '50 23 * * *' # 23:50 UTC (11:50 PM UTC)
+    - cron: '0 21 * * *'  # 9 PM UTC
+    - cron: '30 22 * * *' # 10:30 PM UTC
+    - cron: '50 23 * * *' # 11:50 PM UTC
+```
 
-Use Different File
+### Use Different File
 
-Change the target file by modifying:
-yaml
-
+```yaml
 - name: Update contribution file
   run: |
     echo "🟢 $(date -u)" >> YOUR_FILENAME.md
+```
 
-Safety Features
+---
 
-    Triple Execution Window: Three attempts per day
+## Safety Features
 
-    Smart Detection: Only commits once per day
+* Triple Execution Window: Three attempts per day
+* Smart Detection: Only commits once per day
+* UTC Time: Avoids daylight saving issues
+* Verified Commits: GPG-signed for authenticity
+* Secure Secrets: Encrypted storage of credentials
 
-    UTC Time: Avoids daylight saving issues
+---
 
-    Verified Commits: GPG-signed for authenticity
+## Troubleshooting
 
-    Secure Secrets: Encrypted storage of credentials
+| Issue                | Solution                                   |
+| -------------------- | ------------------------------------------ |
+| Commits not verified | Verify GPG key is added to GitHub account  |
+| Workflow fails       | Check Actions tab for error details        |
+| No commits made      | Verify PAT has write permissions           |
+| Multiple commits     | Check timezone conversion in cron schedule |
 
-Troubleshooting
-Issue	Solution
-Commits not verified	Verify GPG key is added to GitHub account
-Workflow fails	Check Actions tab for error details
-No commits made	Verify PAT has write permissions
-Multiple commits	Check timezone conversion in cron schedule
-Contribution Graph Impact
+### Contribution Graph Impact
 
-https://user-images.githubusercontent.com/51070104/174474720-3f2a1e0a-3b70-4c34-8d95-0e8d0d5d0c8a.png
+![Graph Example](https://user-images.githubusercontent.com/51070104/174474720-3f2a1e0a-3b70-4c34-8d95-0e8d0d5d0c8a.png)
 
-*Note: GitHub may take 24-48 hours to update contribution graphs*
-License
+*Note: GitHub may take 24–48 hours to update contribution graphs.*
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-Disclaimer
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Disclaimer
 
 This project automates GitHub contributions for streak maintenance. Use it responsibly and in compliance with GitHub's Terms of Service.
 
-Maintain your streak effortlessly! ⭐ Give this repo a star if you find it useful.
+---
+
+⭐ Give this repo a star if you find it helpful 💖
