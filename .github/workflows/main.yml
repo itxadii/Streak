@@ -2,7 +2,7 @@ name: Auto Contribution Commit
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # Runs every day at 11:00 PM UTC (4:30 AM IST)
+    - cron: '0 23 * * *'  # 11 PM UTC = 4:30 AM IST
   workflow_dispatch:
 
 jobs:
@@ -12,20 +12,18 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GH_PAT }}  # Crucial: Use PAT for checkout
+          token: ${{ secrets.GH_PAT }}
 
       - name: Set Git identity
         run: |
           git config user.name "itxadii"
-          git config user.email "itzzsecure@gmail.com"  # Must match your GitHub verified email
+          git config user.email "itzzsecure@gmail.com"
 
       - name: Update contribution file
-        run: |
-          echo "🟢 $(date -u)" >> AUTOMATED_CONTRIBUTIONS.md
+        run: echo "🟢 $(date -u)" >> AUTOMATED_CONTRIBUTIONS.md
 
       - name: Commit and Push
         run: |
           git add AUTOMATED_CONTRIBUTIONS.md
-          git commit -m "chore: auto commit at $(date -u)" || exit 0
+          git commit --author="itxadii <itzzsecure@gmail.com>" -m "chore: auto commit at $(date -u)" || exit 0
           git push
-
