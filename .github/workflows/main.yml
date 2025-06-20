@@ -1,8 +1,8 @@
-name: Auto Contribution Commit with Verified GPG Signing
+name: Auto Commit with Verified Signing
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # 11 PM UTC = 4:30 AM IST
+    - cron: '0 23 * * *'
   workflow_dispatch:
 
 jobs:
@@ -20,41 +20,16 @@ jobs:
           git config user.name "itxadii"
           git config user.email "itzzsecure@gmail.com"
 
-      - name: Setup GPG Environment
-        run: |
-          mkdir -p ~/.gnupg
-          chmod 700 ~/.gnupg
-          echo "use-agent" >> ~/.gnupg/gpg.conf
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          gpgconf --kill gpg-agent
-
-      - name: Import GPG Key
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: |
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-          # Get key ID
-          KEY_ID=$(gpg --list-secret-keys --with-colons | awk -F: '/^sec:/ {print $5}' | head -n1)
-          echo "KEY_ID=$KEY_ID" >> $GITHUB_ENV
-          # Configure Git signing
-          git config --global user.signingkey "$KEY_ID"
-          git config --global commit.gpgsign true
-
-      - name: Cache GPG Password
-        run: |
-          echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback --export-secret-keys > /dev/null
-
       - name: Update contribution file
         run: |
           echo "🟢 $(date -u)" >> AUTOMATED_CONTRIBUTIONS.md
-          echo "Verified commit: $(date -u '+%Y-%m-%d %H:%M:%S %Z')" >> AUTOMATED_CONTRIBUTIONS.md
 
-      - name: Commit and Push
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: |
-          git add AUTOMATED_CONTRIBUTIONS.md
-          git commit -S -m "chore: auto commit at $(date -u)" || exit 0
-          git push
+      - name: Commit and Push with GPG Signing
+        uses: crazymykl/gh-commit-sign@v1
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          files: AUTOMATED_CONTRIBUTIONS.md
+          commit_message: "chore: auto commit at $(date -u)"
+          name: itxadii
+          email: itzzsecure@gmail.com
