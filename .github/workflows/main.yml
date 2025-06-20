@@ -2,7 +2,9 @@ name: Auto Contribution Commit with Verified GPG Signing
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # 11 PM UTC = 4:30 AM IST
+    - cron: '0 21 * * *'  # 21:00 UTC = 2:30 AM IST (primary)
+    - cron: '30 22 * * *' # 22:30 UTC = 4:00 AM IST (backup)
+    - cron: '50 23 * * *' # 23:50 UTC = 5:20 AM IST (final backup)
   workflow_dispatch:
 
 jobs:
@@ -20,7 +22,24 @@ jobs:
           git config user.name "itxadii"
           git config user.email "itzzsecure@gmail.com"
 
+      - name: Check for existing commit today
+        id: commit_check
+        run: |
+          # Get last commit date in UTC
+          LAST_COMMIT_UTC=$(git log -1 --format=%cd --date=format:'%Y-%m-%d')
+          TODAY_UTC=$(date -u '+%Y-%m-%d')
+          
+          if [ "$LAST_COMMIT_UTC" = "$TODAY_UTC" ]; then
+            echo "already_committed=true" >> $GITHUB_OUTPUT
+            echo "✅ Already committed today"
+          else
+            echo "already_committed=false" >> $GITHUB_OUTPUT
+            echo "🆕 Need to commit today"
+          fi
+
+      # Only run GPG setup if commit is needed
       - name: Setup GPG Environment
+        if: steps.commit_check.outputs.already_committed == 'false'
         run: |
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
@@ -30,6 +49,7 @@ jobs:
           gpgconf --kill gpg-agent
 
       - name: Import GPG Key
+        if: steps.commit_check.outputs.already_committed == 'false'
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -42,21 +62,21 @@ jobs:
           git config --global user.signingkey "$KEY_ID"
           git config --global commit.gpgsign true
 
-      - name: Test GPG Signing
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: |
-          echo "test" | gpg --clearsign --batch --yes --passphrase-fd 0
-
       - name: Update contribution file
+        if: steps.commit_check.outputs.already_committed == 'false'
         run: |
           echo "🟢 $(date -u)" >> AUTOMATED_CONTRIBUTIONS.md
           echo "Verified commit: $(date -u '+%Y-%m-%d %H:%M:%S %Z')" >> AUTOMATED_CONTRIBUTIONS.md
 
       - name: Commit and Push
+        if: steps.commit_check.outputs.already_committed == 'false'
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           git add AUTOMATED_CONTRIBUTIONS.md
           git commit -S -m "chore: auto commit at $(date -u)" || exit 0
           git push
+
+      - name: Skip if already committed
+        if: steps.commit_check.outputs.already_committed == 'true'
+        run: echo "⏩ Skipping commit - already made today"
