@@ -1,32 +1,23 @@
 name: contribution-streak-maintainer
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual trigger
   schedule:
-    # For more information on the cron scheduler,
-    # see https://crontab.guru/ or https://crontab.cronhub.io/.
-    # This cron schedule means the action runs every day at midnight UTC.
-    - cron: "0 22 * * *"
+    - cron: "0 22 * * *" # Runs daily at 3:30 AM IST (22:00 UTC)
 
 permissions:
-  contents: write
+  contents: write # Needed to make commits
 
 jobs:
-  contribution-streak-maintainer:
+  maintain-streak:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}  # This is auto-signed by GitHub
-
-      - name: Setup Git Identity
-        run: |
-          git config user.name "itxadii"
-          git config user.email "163154088+itxadii@users.noreply.github.com"
-
       - name: Make a contribution
         run: |
-          npx contribution-streak-maintainer itxadii/Streak --email=163154088+itxadii@users.noreply.github.com
+          npx contribution-streak-maintainer itxadii/Streak \
+            --email=163154088+itxadii@users.noreply.github.com \
+            --token=${{ secrets.GITHUB_TOKEN }}
 
 
 
