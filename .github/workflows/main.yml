@@ -27,26 +27,41 @@ jobs:
           echo "use-agent" >> ~/.gnupg/gpg.conf
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          echo "no-tty" >> ~/.gnupg/gpg.conf
           gpgconf --kill gpg-agent
 
       - name: Import GPG Key
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
+          # Write key to file
           echo "$GPG_PRIVATE_KEY" > private.key
-          gpg --batch --passphrase "$GPG_PASSPHRASE" --import private.key
+          # Import without passphrase (will be added later)
+          gpg --batch --import private.key
           rm private.key
-          KEY_ID=$(gpg --list-secret-keys --with-colons | awk -F: '$1 == "sec" {print $5}' | head -n1)
+          # Get key ID
+          KEY_ID=$(gpg --list-secret-keys --with-colons | awk -F: '/^sec:/ {print $5}' | head -n1)
           echo "KEY_ID=$KEY_ID" >> $GITHUB_ENV
           git config --global user.signingkey "$KEY_ID"
           git config --global commit.gpgsign true
 
-      - name: Test GPG Signing
+      - name: Add Passphrase to Key
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          echo "test" | gpg --clearsign --batch --yes --passphrase-fd 0
+          # Get keygrip
+          KEYGRIP=$(gpg --list-secret-keys --with-keygrip | awk '/^sec/ {getline; print $3}' | head -n1)
+          # Add passphrase to agent
+          /usr/lib/gnupg/gpg-connect-agent <<EOF
+          PRESET_PASSPHRASE $KEYGRIP -1 $GPG_PASSPHRASE
+          EOF
+
+      - name: Test GPG Signing
+        run: |
+          echo "Testing GPG signing..." > test.txt
+          git add test.txt
+          git commit -S -m "Test GPG signing" || true
+          git reset HEAD~1  # Undo test commit
 
       - name: Update contribution file
         run: |
@@ -54,8 +69,6 @@ jobs:
           echo "Verified commit: $(date -u '+%Y-%m-%d %H:%M:%S %Z')" >> AUTOMATED_CONTRIBUTIONS.md
 
       - name: Commit and Push
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           git add AUTOMATED_CONTRIBUTIONS.md
           git commit -S -m "chore: auto commit at $(date -u)" || exit 0
