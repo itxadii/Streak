@@ -15,14 +15,18 @@ jobs:
   contribution-streak-maintainer:
     runs-on: ubuntu-latest
     steps:
-      - name: Make a contribution
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # This is auto-signed by GitHub
+
+      - name: Setup Git Identity
         run: |
-          git clone https://github.com/${{ github.repository }} repo
-          cd repo
           git config user.name "itxadii"
           git config user.email "163154088+itxadii@users.noreply.github.com"
-          npx contribution-streak-maintainer ${{ github.repository }} --email=163154088+itxadii@users.noreply.github.com --condition=6
-        env:
-          DEVFUL_GITHUB_TOKEN: ${{ secrets.CSM_GITHUB_TOKEN }}
+
+      - name: Make a contribution
+        run: |
+          npx contribution-streak-maintainer itxadii/Streak --email=163154088+itxadii@users.noreply.github.com
+
 
 
