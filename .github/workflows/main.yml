@@ -13,17 +13,24 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT }}
+          # Add fetch-depth to fix author attribution
+          fetch-depth: 0
 
-      - name: Set Git identity
+      - name: Setup Git Identity
         run: |
           git config user.name "itxadii"
           git config user.email "itzzsecure@gmail.com"
+          # Force correct author info for new commits
+          git config user.useConfigOnly true
 
       - name: Update contribution file
-        run: echo "🟢 $(date -u)" >> AUTOMATED_CONTRIBUTIONS.md
+        run: |
+          echo "🟢 $(date -u)" >> AUTOMATED_CONTRIBUTIONS.md
 
       - name: Commit and Push
         run: |
           git add AUTOMATED_CONTRIBUTIONS.md
-          git commit --author="itxadii <itzzsecure@gmail.com>" -m "chore: auto commit at $(date -u)" || exit 0
-          git push
+          git commit \
+            --author="itxadii <itzzsecure@gmail.com>" \
+            -m "chore: auto commit at $(date -u)" || exit 0
+          git push origin HEAD:${{ github.ref }}
